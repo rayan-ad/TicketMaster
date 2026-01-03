@@ -93,11 +93,22 @@ export class AdminDashboardComponent implements OnInit {
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
-    this.loadStats();
-    this.loadEvents();
-    this.loadVenues();
+  this.loadStats();
+  this.loadEvents();
+  this.loadVenues();
+
+  // Charger la liste des users uniquement si ADMIN (recommandé)
+  if (this.isAdmin()) {
     this.loadUsers();
   }
+  }
+
+  private isAdmin(): boolean {
+    const user = JSON.parse(localStorage.getItem('current_user') || '{}');
+    return user.role === 'Admin';
+  }
+
+  
 
   // ==================== STATS ====================
 
@@ -623,6 +634,10 @@ export class AdminDashboardComponent implements OnInit {
     return user.role === 'Admin' || user.role === 'Organisateur';
   }
 
+  isOrganisateurIsConnected():boolean{
+    const user = JSON.parse(localStorage.getItem('current_user') || '{}');
+    return user.role === 'Organisateur';
+  }
   // ==================== PAGINATION CONTROLS ====================
 
   // Events pagination

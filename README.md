@@ -364,7 +364,7 @@ Pour tester les endpoints protégés:
 - Id, Name, Date, Type, Description, VenueId, ImageEvent
 
 **Venues**
-- Id, Name, Address, City, Capacity
+- Id, Name,Capacity
 
 **Seats**
 - Id, VenueId, Row, Number, PricingZoneId
@@ -372,8 +372,8 @@ Pour tester les endpoints protégés:
 **PricingZones**
 - Id, VenueId, Name, Price, Color
 
-**SeatReservationState**
-- Id, EventId, SeatId, State (Free/ReservedTemp/Paid), UserId, ReservedAt, ExpiresAt
+**SeatReservationStates**
+- Id, EventId, SeatId, State (Free/ReservedTemp/Paid), UserId, ReservedAt, ExpiresAt, CreatedAt, ExpiresAt
 
 **Reservations**
 - Id, UserId, EventId, Status (Pending/Paid/Cancelled), TotalAmount, CreatedAt, ExpiresAt
@@ -385,19 +385,7 @@ Pour tester les endpoints protégés:
 - Id, ReservationId, Amount, Method, Reference, Status, CreatedAt, ConfirmedAt
 
 **Tickets**
-- Id, ReservationId, SeatId, TicketNumber, QrCodeData, QrCodeUrl, GeneratedAt, IsUsed
-
-### Diagramme ERD (Simplifié)
-
-```
-Users ─┬─< Reservations >─┬─ Events
-       │                   │
-       └─< SeatReservationState
-                           │
-                          Seats ─< Venues
-                           │
-                      PricingZones
-```
+- Id, ReservationId, SeatId, TicketNumber, QrCodeData, QrCodeUrl, GeneratedAt, IsUsed,UsedAt
 
 ---
 

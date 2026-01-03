@@ -37,8 +37,13 @@
 
   <div class="max-w-7xl mx-auto px-6 py-8">
     <!-- Header -->
+    
     <div class="flex justify-between items-center mb-8">
-      <h1 class="text-4xl font-bold text-[#001F3F]">Dashboard Admin</h1>
+      @if (isOrganisateurIsConnected()) {
+      <h1 class="text-4xl font-bold text-[#001F3F]">Dashboard Organisateur</h1>
+      }@else{
+        <h1 class="text-4xl font-bold text-[#001F3F]">Dashboard Admin</h1>
+      }
       <a routerLink="/" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
         Retour à l'accueil
       </a>
@@ -71,14 +76,17 @@
           class="px-6 py-4 font-semibold hover:bg-gray-50 transition">
           🏟️ Salles/Stades
         </button>
-        <button
-          (click)="activeTab = 'users'"
-          [class.border-b-2]="activeTab === 'users'"
-          [class.border-purple-600]="activeTab === 'users'"
-          [class.text-purple-600]="activeTab === 'users'"
-          class="px-6 py-4 font-semibold hover:bg-gray-50 transition">
-          👥 Utilisateurs
-        </button>
+        @if (!isOrganisateurIsConnected()) {
+          <button
+            (click)="activeTab = 'users'"
+            [class.border-b-2]="activeTab === 'users'"
+            [class.border-purple-600]="activeTab === 'users'"
+            [class.text-purple-600]="activeTab === 'users'"
+            class="px-6 py-4 font-semibold hover:bg-gray-50 transition">
+            👥 Utilisateurs
+          </button>
+        }
+
       </div>
     </div>
 
@@ -140,7 +148,7 @@
             </div>
           </div>
         </div>
-
+        @if (!isOrganisateurIsConnected()) {
         <div class="bg-white rounded-xl shadow border p-6">
           <div class="flex items-center justify-between">
             <div>
@@ -154,6 +162,7 @@
             </div>
           </div>
         </div>
+      }
       </div>
 
       <div class="bg-white rounded-xl shadow border p-6">
@@ -660,4 +669,5 @@
       }
     </div>
   }
+  
 </div>

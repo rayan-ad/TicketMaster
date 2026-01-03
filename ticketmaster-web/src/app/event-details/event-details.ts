@@ -581,7 +581,7 @@ export class EventDetails implements OnDestroy {
     // Block selection for Admins and Organizers
     const currentUser = this.authService.getCurrentUser();
     if (currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Organisateur')) {
-      this.showNotification('Les administrateurs ne peuvent pas réserver de sièges.', 'warning');
+      this.showNotification('Les administrateurs et les organisateur ne peuvent pas réserver de sièges.', 'warning');
       return;
     }
 
