@@ -1,0 +1,663 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Toast Notification -->
+  @if (showNotification) {
+    <div class="fixed top-4 right-4 z-[9999] px-6 py-3 rounded-lg shadow-2xl text-white max-w-md break-words border-2"
+      [class.bg-green-500]="notificationType === 'success'"
+      [class.bg-red-500]="notificationType === 'error'"
+      [class.border-green-700]="notificationType === 'success'"
+      [class.border-red-700]="notificationType === 'error'"
+      style="animation: slideIn 0.3s ease-out;">
+      <div class="flex items-start gap-3">
+        @if (notificationType === 'error') {
+          <svg class="w-6 h-6 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+          </svg>
+        } @else {
+          <svg class="w-6 h-6 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          </svg>
+        }
+        <div class="flex-1 font-medium">{{ notificationMessage }}</div>
+      </div>
+    </div>
+  }
+
+  <style>
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+  </style>
+
+  <div class="max-w-7xl mx-auto px-6 py-8">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8">
+      <h1 class="text-4xl font-bold text-[#001F3F]">Dashboard Admin</h1>
+      <a routerLink="/" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+        Retour à l'accueil
+      </a>
+    </div>
+
+    <!-- Tabs -->
+    <div class="bg-white rounded-xl shadow border mb-6">
+      <div class="flex border-b">
+        <button
+          (click)="activeTab = 'stats'"
+          [class.border-b-2]="activeTab === 'stats'"
+          [class.border-purple-600]="activeTab === 'stats'"
+          [class.text-purple-600]="activeTab === 'stats'"
+          class="px-6 py-4 font-semibold hover:bg-gray-50 transition">
+          📊 Statistiques
+        </button>
+        <button
+          (click)="activeTab = 'events'"
+          [class.border-b-2]="activeTab === 'events'"
+          [class.border-purple-600]="activeTab === 'events'"
+          [class.text-purple-600]="activeTab === 'events'"
+          class="px-6 py-4 font-semibold hover:bg-gray-50 transition">
+          🎫 Événements
+        </button>
+        <button
+          (click)="activeTab = 'venues'"
+          [class.border-b-2]="activeTab === 'venues'"
+          [class.border-purple-600]="activeTab === 'venues'"
+          [class.text-purple-600]="activeTab === 'venues'"
+          class="px-6 py-4 font-semibold hover:bg-gray-50 transition">
+          🏟️ Salles/Stades
+        </button>
+        <button
+          (click)="activeTab = 'users'"
+          [class.border-b-2]="activeTab === 'users'"
+          [class.border-purple-600]="activeTab === 'users'"
+          [class.text-purple-600]="activeTab === 'users'"
+          class="px-6 py-4 font-semibold hover:bg-gray-50 transition">
+          👥 Utilisateurs
+        </button>
+      </div>
+    </div>
+
+    <!-- Tab: Statistiques -->
+    @if (activeTab === 'stats') {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-xl shadow border p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-500 text-sm">Total Événements</p>
+              <p class="text-3xl font-bold text-purple-600">{{ stats.totalEvents }}</p>
+            </div>
+            <div class="bg-purple-100 p-3 rounded-full">
+              <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow border p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-500 text-sm">Total Réservations</p>
+              <p class="text-3xl font-bold text-blue-600">{{ stats.totalReservations }}</p>
+            </div>
+            <div class="bg-blue-100 p-3 rounded-full">
+              <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow border p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-500 text-sm">Revenus Totaux</p>
+              <p class="text-3xl font-bold text-green-600">{{ stats.totalRevenue | currency:'EUR' }}</p>
+            </div>
+            <div class="bg-green-100 p-3 rounded-full">
+              <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow border p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-500 text-sm">Salles/Stades</p>
+              <p class="text-3xl font-bold text-orange-600">{{ venues.length }}</p>
+            </div>
+            <div class="bg-orange-100 p-3 rounded-full">
+              <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow border p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-500 text-sm">Total Utilisateurs</p>
+              <p class="text-3xl font-bold text-pink-600">{{ stats.totalUsers }}</p>
+            </div>
+            <div class="bg-pink-100 p-3 rounded-full">
+              <svg class="w-8 h-8 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow border p-6">
+        <h2 class="text-2xl font-bold mb-4">Événements Récents</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="border-b">
+                <th class="text-left py-3 px-4">Nom</th>
+                <th class="text-left py-3 px-4">Date</th>
+                <th class="text-left py-3 px-4">Type</th>
+                <th class="text-right py-3 px-4">Réservations</th>
+                <th class="text-right py-3 px-4">Revenus</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (event of eventsDetailed.slice(0, 5); track event.id) {
+                <tr class="border-b hover:bg-gray-50">
+                  <td class="py-3 px-4 font-semibold">{{ event.name }}</td>
+                  <td class="py-3 px-4">{{ event.date | date:'d MMM y, HH:mm' }}</td>
+                  <td class="py-3 px-4"><span class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-sm">{{ event.type }}</span></td>
+                  <td class="py-3 px-4 text-right">{{ event.soldSeats || 0 }}</td>
+                  <td class="py-3 px-4 text-right font-semibold text-green-600">{{ (event.actualRevenue || 0) | currency:'EUR' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
+    <!-- Tab: Événements -->
+    @if (activeTab === 'events') {
+      <div class="bg-white rounded-xl shadow border p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold">Gestion des Événements</h2>
+          @if (isAdminOrOrganisateur()) {
+            <button (click)="openEventModal()" class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-semibold">
+              + Nouvel Événement
+            </button>
+          }
+        </div>
+
+        @if (loading) {
+          <p class="text-center py-8 text-gray-500">Chargement...</p>
+        } @else if (events.length === 0) {
+          <p class="text-center py-8 text-gray-500">Aucun événement</p>
+        } @else {
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @for (event of events; track event.id) {
+              <div class="border rounded-lg overflow-hidden hover:shadow-lg transition">
+                <a [routerLink]="['/event', event.id]" class="block">
+                  <img [src]="event.imageEvent || 'default-event.jpeg'" alt="" class="w-full h-48 object-cover cursor-pointer">
+                </a>
+                <div class="p-4">
+                  <a [routerLink]="['/event', event.id]" class="block hover:text-purple-600 transition">
+                    <h3 class="font-bold text-lg mb-2">{{ event.name }}</h3>
+                  </a>
+                  <p class="text-sm text-gray-600 mb-2">{{ event.date | date:'EEE, d MMM y • HH:mm' }}</p>
+                  <p class="text-sm text-gray-500 mb-4">{{ event.type }}</p>
+                  <div class="flex gap-2">
+                    <button (click)="openEventModal(event)" class="flex-1 px-3 py-2 border border-purple-600 text-purple-600 rounded hover:bg-purple-50 transition text-sm">
+                      Modifier
+                    </button>
+                    <button (click)="deleteEvent(event.id)" class="flex-1 px-3 py-2 border border-red-600 text-red-600 rounded hover:bg-red-50 transition text-sm">
+                      Supprimer
+                    </button>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Pagination Events -->
+        @if (events.length > 0) {
+          <div class="flex justify-center items-center gap-4 mt-6">
+            <button
+              (click)="prevEventsPage()"
+              [disabled]="eventsPagination.currentPage === 1"
+              class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed">
+              Précédent
+            </button>
+            <span class="text-gray-700">
+              Page {{ eventsPagination.currentPage }} / {{ eventsPagination.totalPages }}
+            </span>
+            <button
+              (click)="nextEventsPage()"
+              [disabled]="eventsPagination.currentPage === eventsPagination.totalPages"
+              class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed">
+              Suivant
+            </button>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Tab: Salles/Stades -->
+    @if (activeTab === 'venues') {
+      <div class="bg-white rounded-xl shadow border p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold">Gestion des Salles/Stades</h2>
+          @if (isAdminOrOrganisateur()) {
+            <button (click)="openVenueModal()" class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-semibold">
+              + Nouvelle Salle
+            </button>
+          }
+        </div>
+
+        @if (venues.length === 0) {
+          <p class="text-center py-8 text-gray-500">Aucune salle</p>
+        } @else {
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @for (venue of venues; track venue.id) {
+              <div class="border rounded-lg p-6 hover:shadow-lg transition">
+                <a [routerLink]="['/venue', venue.id, 'events']" class="block hover:text-purple-600 transition">
+                  <h3 class="font-bold text-xl mb-2 cursor-pointer">{{ venue.name }}</h3>
+                </a>
+                <p class="text-gray-600 mb-3"><span class="font-semibold">Capacité:</span> {{ venue.capacity }} places</p>
+
+                @if (venue.pricingZones && venue.pricingZones.length > 0) {
+                  <div class="mb-4 space-y-1">
+                    <p class="text-sm font-semibold text-gray-700 mb-2">Zones:</p>
+                    @for (zone of venue.pricingZones; track zone.id) {
+                      <div class="flex items-center justify-between text-sm">
+                        <div class="flex items-center gap-2">
+                          <div class="w-3 h-3 rounded-full" [style.background-color]="zone.color"></div>
+                          <span>{{ zone.name }}</span>
+                        </div>
+                        <div class="text-gray-600">
+                          <span class="font-medium">{{ getSeatsForZone(venue, zone.id) }}</span> sièges
+                          <span class="mx-1">•</span>
+                          <span class="font-medium">{{ zone.price }}€</span>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+
+                <div class="flex gap-2">
+                  <a [routerLink]="['/venue', venue.id, 'events']" class="flex-1 px-3 py-2 border border-blue-600 text-blue-600 rounded hover:bg-blue-50 transition text-center text-sm">
+                    Voir événements
+                  </a>
+                  <button (click)="openVenueModal(venue)" class="flex-1 px-3 py-2 border border-purple-600 text-purple-600 rounded hover:bg-purple-50 transition text-sm">
+                    Modifier
+                  </button>
+                  <button (click)="deleteVenue(venue.id)" class="flex-1 px-3 py-2 border border-red-600 text-red-600 rounded hover:bg-red-50 transition text-sm">
+                    Supprimer
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Pagination Venues -->
+        @if (venues.length > 0) {
+          <div class="flex justify-center items-center gap-4 mt-6">
+            <button
+              (click)="prevVenuesPage()"
+              [disabled]="venuesPagination.currentPage === 1"
+              class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed">
+              Précédent
+            </button>
+            <span class="text-gray-700">
+              Page {{ venuesPagination.currentPage }} / {{ venuesPagination.totalPages }}
+            </span>
+            <button
+              (click)="nextVenuesPage()"
+              [disabled]="venuesPagination.currentPage === venuesPagination.totalPages"
+              class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed">
+              Suivant
+            </button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Modal Événement -->
+  @if (showEventModal) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" (click)="closeEventModal()">
+      <div class="bg-white rounded-2xl p-8 max-w-2xl w-full" (click)="$event.stopPropagation()">
+        <h2 class="text-2xl font-bold mb-6">{{ selectedEvent ? 'Modifier' : 'Créer' }} un Événement</h2>
+
+        <form #eventFormRef="ngForm" (ngSubmit)="saveEvent(eventFormRef)" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-2">Nom *</label>
+            <input
+              [(ngModel)]="eventForm.name"
+              name="name"
+              type="text"
+              required
+              minlength="3"
+              #nameField="ngModel"
+              class="w-full px-4 py-2 border rounded-lg focus:outline-none"
+              [class.border-red-500]="nameField.invalid && nameField.touched"
+              [class.border-purple-600]="nameField.valid || !nameField.touched">
+            @if (nameField.invalid && nameField.touched) {
+              <p class="text-red-500 text-xs mt-1">Le nom est requis (min. 3 caractères)</p>
+            }
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-2">Date et Heure *</label>
+            <input
+              [(ngModel)]="eventForm.date"
+              name="date"
+              type="datetime-local"
+              required
+              #dateField="ngModel"
+              class="w-full px-4 py-2 border rounded-lg focus:outline-none"
+              [class.border-red-500]="dateField.invalid && dateField.touched"
+              [class.border-purple-600]="dateField.valid || !dateField.touched">
+            @if (dateField.invalid && dateField.touched) {
+              <p class="text-red-500 text-xs mt-1">La date est requise</p>
+            }
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-2">Type *</label>
+            <select
+              [(ngModel)]="eventForm.type"
+              name="type"
+              required
+              #typeField="ngModel"
+              class="w-full px-4 py-2 border rounded-lg focus:outline-none"
+              [class.border-red-500]="typeField.invalid && typeField.touched"
+              [class.border-purple-600]="typeField.valid || !typeField.touched">
+              <option value="">-- Sélectionner un type --</option>
+              <option value="Sport">Sport</option>
+              <option value="Culturel">Culturel</option>
+              <option value="Musique">Musique</option>
+            </select>
+            @if (typeField.invalid && typeField.touched) {
+              <p class="text-red-500 text-xs mt-1">Le type est requis</p>
+            }
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-2">
+              Salle/Stade *
+              @if (selectedEvent) {
+                <span class="text-xs text-gray-500 font-normal ml-2">(non modifiable après création)</span>
+              }
+            </label>
+            <select
+              [(ngModel)]="eventForm.venueId"
+              name="venueId"
+              required
+              #venueField="ngModel"
+              [disabled]="selectedEvent !== null"
+              class="w-full px-4 py-2 border rounded-lg focus:outline-none"
+              [class.bg-gray-100]="selectedEvent !== null"
+              [class.cursor-not-allowed]="selectedEvent !== null"
+              [class.border-red-500]="venueField.invalid && venueField.touched"
+              [class.border-purple-600]="venueField.valid || !venueField.touched">
+              <option [value]="null">-- Sélectionner une salle --</option>
+              @for (venue of venues; track venue.id) {
+                <option [value]="venue.id">{{ venue.name }}</option>
+              }
+            </select>
+            @if (venueField.invalid && venueField.touched) {
+              <p class="text-red-500 text-xs mt-1">La salle est requise</p>
+            }
+            @if (selectedEvent) {
+              <p class="text-gray-600 text-xs mt-1">
+                💡 Le venue ne peut pas être modifié car les sièges sont déjà associés à cet événement.
+              </p>
+            }
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-2">Description (facultatif)</label>
+            <textarea
+              [(ngModel)]="eventForm.description"
+              name="description"
+              rows="3"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-600"></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-2">URL Image (facultatif)</label>
+            <input
+              [(ngModel)]="eventForm.imageEvent"
+              name="imageEvent"
+              type="text"
+              placeholder="https://exemple.com/image.jpg"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-600">
+            <p class="text-gray-500 text-xs mt-1">URL directe vers une image (pas de lien de recherche)</p>
+          </div>
+
+          <div class="flex gap-3 mt-6">
+            <button
+              type="submit"
+              [disabled]="eventFormRef.invalid"
+              class="flex-1 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed">
+              {{ selectedEvent ? 'Modifier' : 'Créer' }}
+            </button>
+            <button type="button" (click)="closeEventModal()" class="flex-1 px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+              Annuler
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- Modal Salle -->
+  @if (showVenueModal) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" (click)="closeVenueModal()">
+      <div class="bg-white rounded-2xl p-8 max-w-md w-full" (click)="$event.stopPropagation()">
+        <h2 class="text-2xl font-bold mb-6">{{ selectedVenue ? 'Modifier' : 'Créer' }} une Salle/Stade</h2>
+
+        <form #venueFormRef="ngForm" (ngSubmit)="saveVenue(venueFormRef)" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium mb-2">Nom *</label>
+            <input
+              [(ngModel)]="venueForm.name"
+              name="name"
+              type="text"
+              required
+              minlength="3"
+              #venueNameField="ngModel"
+              class="w-full px-4 py-2 border rounded-lg focus:outline-none"
+              [class.border-red-500]="venueNameField.invalid && venueNameField.touched"
+              [class.border-purple-600]="venueNameField.valid || !venueNameField.touched">
+            @if (venueNameField.invalid && venueNameField.touched) {
+              <p class="text-red-500 text-xs mt-1">Le nom est requis (min. 3 caractères)</p>
+            }
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-2">Capacité *</label>
+            <input
+              [(ngModel)]="venueForm.capacity"
+              name="capacity"
+              type="number"
+              required
+              min="1"
+              #capacityField="ngModel"
+              class="w-full px-4 py-2 border rounded-lg focus:outline-none"
+              [class.border-red-500]="capacityField.invalid && capacityField.touched"
+              [class.border-purple-600]="capacityField.valid || !capacityField.touched">
+            @if (capacityField.invalid && capacityField.touched) {
+              <p class="text-red-500 text-xs mt-1">La capacité doit être supérieure à 0</p>
+            }
+          </div>
+
+          <!-- Zones tarifaires en création -->
+          @if (!selectedVenue) {
+            <div class="border-t pt-4">
+              <label class="block text-sm font-medium mb-3">Zones Tarifaires * (Sélectionner au moins une)</label>
+              <div class="space-y-3">
+                @for (zone of availablePricingZones; track zone.name) {
+                  <div class="flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50">
+                    <input
+                      type="checkbox"
+                      [(ngModel)]="zone.selected"
+                      [name]="'zone_' + zone.name"
+                      class="w-5 h-5 text-purple-600">
+                    <div class="flex-1">
+                      <div class="flex items-center gap-2">
+                        <span class="font-medium">{{ zone.name }}</span>
+                        <div class="w-4 h-4 rounded-full" [style.background-color]="zone.color"></div>
+                      </div>
+                    </div>
+                    @if (zone.selected) {
+                      <div class="flex items-center gap-3">
+                        <input
+                          type="number"
+                          [(ngModel)]="zone.seatCount"
+                          [name]="'seatCount_' + zone.name"
+                          min="1"
+                          placeholder="Nb sièges"
+                          class="w-28 px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-600">
+                        <input
+                          type="number"
+                          [(ngModel)]="zone.price"
+                          [name]="'price_' + zone.name"
+                          min="0"
+                          step="0.01"
+                          placeholder="Prix"
+                          class="w-24 px-3 py-2 border rounded-lg focus:outline-none focus:border-purple-600">
+                        <span class="text-gray-600">€</span>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+              <p class="text-gray-500 text-xs mt-2">Spécifiez le nombre de sièges et le prix pour chaque zone</p>
+            </div>
+          }
+
+          <!-- Zones tarifaires existantes (lecture seule en édition) -->
+          @if (selectedVenue && selectedVenue.pricingZones) {
+            <div class="border-t pt-4">
+              <label class="block text-sm font-medium mb-3">Zones Tarifaires existantes (lecture seule)</label>
+              <p class="text-amber-600 text-xs mb-3">⚠️ La modification des zones n'est pas possible car des sièges et réservations existent déjà</p>
+              <div class="space-y-2">
+                @for (zone of selectedVenue.pricingZones; track zone.id) {
+                  <div class="flex items-center justify-between p-3 bg-gray-50 border rounded-lg">
+                    <div class="flex items-center gap-2">
+                      <div class="w-4 h-4 rounded-full" [style.background-color]="zone.color"></div>
+                      <span class="font-medium">{{ zone.name }}</span>
+                    </div>
+                    <div class="flex items-center gap-4 text-sm text-gray-600">
+                      <span>{{ getSeatsForZone(selectedVenue, zone.id) }} sièges</span>
+                      <span class="font-semibold text-purple-600">{{ zone.price }}€</span>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <div class="flex gap-3 mt-6">
+            <button
+              type="submit"
+              [disabled]="venueFormRef.invalid"
+              class="flex-1 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed">
+              {{ selectedVenue ? 'Modifier' : 'Créer' }}
+            </button>
+            <button type="button" (click)="closeVenueModal()" class="flex-1 px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
+              Annuler
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- Tab: Utilisateurs -->
+  @if (activeTab === 'users') {
+    <div class="bg-white rounded-xl shadow border p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold">Gestion des Utilisateurs</h2>
+        <p class="text-gray-600">Total: {{ users.length }} utilisateurs</p>
+      </div>
+
+      @if (users.length === 0) {
+        <p class="text-center py-8 text-gray-500">Aucun utilisateur</p>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="text-left py-3 px-4">ID</th>
+                <th class="text-left py-3 px-4">Nom</th>
+                <th class="text-left py-3 px-4">Email</th>
+                <th class="text-left py-3 px-4">Rôle</th>
+                <th class="text-right py-3 px-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (user of users; track user.id) {
+                <tr class="border-t hover:bg-gray-50">
+                  <td class="py-3 px-4">{{ user.id }}</td>
+                  <td class="py-3 px-4 font-medium">{{ user.name }}</td>
+                  <td class="py-3 px-4">{{ user.email }}</td>
+                  <td class="py-3 px-4">
+                    <select
+                      [value]="user.role"
+                      (change)="updateUserRole(user.id, $any($event.target).value)"
+                      class="px-3 py-1 border rounded-lg focus:outline-none focus:border-purple-600">
+                      <option value="Client">Client</option>
+                      <option value="Organisateur">Organisateur</option>
+                      <option value="Admin">Admin</option>
+                    </select>
+                  </td>
+                  <td class="py-3 px-4 text-right">
+                    <button
+                      (click)="deleteUser(user.id)"
+                      class="px-3 py-1 border border-red-600 text-red-600 rounded hover:bg-red-50 transition text-sm">
+                      Supprimer
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      <!-- Pagination Users -->
+      @if (users.length > 0) {
+        <div class="flex justify-center items-center gap-4 mt-6">
+          <button
+            (click)="prevUsersPage()"
+            [disabled]="usersPagination.currentPage === 1"
+            class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed">
+            Précédent
+          </button>
+          <span class="text-gray-700">
+            Page {{ usersPagination.currentPage }} / {{ usersPagination.totalPages }}
+          </span>
+          <button
+            (click)="nextUsersPage()"
+            [disabled]="usersPagination.currentPage === usersPagination.totalPages"
+            class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed">
+            Suivant
+          </button>
+        </div>
+      }
+    </div>
+  }
+</div>

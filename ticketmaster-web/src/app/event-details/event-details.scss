@@ -1,0 +1,35 @@
+/// Styles pour la visualisation du stade
+
+.map-viewport {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ✅ ZERO blink: pas d'animation, pas de transition, pas de scale */
+.seat-square {
+  rect {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+    filter: none !important;
+    stroke-width: 0.1;
+  }
+
+  &:hover {
+    rect {
+      transition: none !important;
+      animation: none !important;
+      transform: none !important;
+      filter: none !important;
+      /* tu peux juste changer un truc léger si tu veux */
+      stroke-width: 0.12;
+    }
+  }
+}
+
+svg {
+  shape-rendering: geometricPrecision;
+  user-select: none;
+  -webkit-user-select: none;
+}

@@ -1,0 +1,80 @@
+<!-- Navbar -->
+<nav class="flex justify-between items-center px-10 py-5 bg-[#001F3F] text-white shadow-lg">
+  <div class="flex items-center gap-3">
+    <a routerLink="/" class="text-2xl font-bold tracking-wide hover:text-[#FFD700] transition">TicketMaster</a>
+  </div>
+
+  <ul class="flex gap-6 text-lg font-medium">
+    <li>
+      <a routerLink="/" [queryParams]="{}" class="hover:text-[#FFD700] cursor-pointer transition">
+        Événements
+      </a>
+    </li>
+    <li>
+      <a routerLink="/" [queryParams]="{type: 'Culturel'}" class="hover:text-[#FFD700] cursor-pointer transition">
+        Culturel
+      </a>
+    </li>
+    <li>
+      <a routerLink="/" [queryParams]="{type: 'Sport'}" class="hover:text-[#FFD700] cursor-pointer transition">
+        Sport
+      </a>
+    </li>
+    <li>
+      <a routerLink="/" [queryParams]="{type: 'Musique'}" class="hover:text-[#FFD700] cursor-pointer transition">
+        Musique
+      </a>
+    </li>
+  </ul>
+
+  <div class="relative">
+    @if (!currentUser) {
+      <div class="flex gap-3">
+        <a routerLink="/login" class="bg-transparent border-2 border-[#FFD700] text-[#FFD700] font-semibold px-5 py-2 rounded-lg hover:bg-[#FFD700] hover:text-[#001F3F] transition">
+          Se connecter
+        </a>
+        <a routerLink="/register" class="bg-[#FFD700] text-[#001F3F] font-semibold px-5 py-2 rounded-lg hover:bg-yellow-400 transition">
+          S'inscrire
+        </a>
+      </div>
+    } @else {
+      <div>
+        <button (click)="toggleUserMenu()" class="flex items-center gap-2 bg-[#FFD700] text-[#001F3F] font-semibold px-5 py-2 rounded-lg hover:bg-yellow-400 transition">
+          <span>Hi {{ currentUser.name }}</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+
+        @if (showUserMenu) {
+          <div class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
+            <div class="px-4 py-3 border-b border-gray-200">
+              <p class="text-sm text-gray-900 font-semibold">{{ currentUser.name }}</p>
+              <p class="text-xs text-gray-500">{{ currentUser.email }}</p>
+              <p class="text-xs text-purple-600 font-semibold mt-1">{{ currentUser.role }}</p>
+            </div>
+            @if (currentUser.role === 'Admin' || currentUser.role === 'Organisateur') {
+              <a routerLink="/admin" (click)="showUserMenu = false" class="block px-4 py-2 text-sm text-purple-700 font-semibold hover:bg-purple-50">
+                📊 Dashboard Admin
+              </a>
+            }
+            <a routerLink="/profile" (click)="showUserMenu = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+              Mon Profil
+            </a>
+            <a routerLink="/my-reservations" (click)="showUserMenu = false" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+              Mes Réservations
+            </a>
+            <button (click)="logout()" class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+              Déconnexion
+            </button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</nav>
+
+<!-- Ici le router affiche les pages -->
+<router-outlet></router-outlet>
+
+

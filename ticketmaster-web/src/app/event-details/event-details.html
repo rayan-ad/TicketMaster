@@ -1,0 +1,418 @@
+<!-- seat-map.component.html (fichier complet corrigé) -->
+<section class="p-0">
+  <!-- Toast Notification -->
+  <div *ngIf="showToast"
+       class="fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg text-white font-medium transition-all duration-300"
+       [class.bg-green-500]="toastType === 'success'"
+       [class.bg-red-500]="toastType === 'error'"
+       [class.bg-orange-500]="toastType === 'warning'">
+    {{ toastMessage }}
+  </div>
+
+  <!-- Tooltip personnalisé au hover -->
+  <div *ngIf="hoveredSeat"
+       class="fixed z-[100] pointer-events-none"
+       [style.left.px]="tooltipX + 15"
+       [style.top.px]="tooltipY + 15">
+    <div class="bg-gray-900 text-white px-4 py-3 rounded-lg shadow-2xl border border-gray-700 min-w-[200px]">
+      <div class="font-bold text-lg mb-2 text-purple-300">{{hoveredSeat.zone?.name || 'Zone'}}</div>
+      <div class="space-y-1 text-sm">
+        <div class="flex justify-between">
+          <span class="text-gray-400">Rangée:</span>
+          <span class="font-semibold">{{hoveredSeat.row}}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-400">Siège:</span>
+          <span class="font-semibold">#{{hoveredSeat.number}}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-400">Prix:</span>
+          <span class="font-semibold text-green-400">{{hoveredSeat.price | currency:'EUR'}}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-400">Statut:</span>
+          <span class="font-semibold"
+                [class.text-green-400]="hoveredSeat.state === 'Free'"
+                [class.text-orange-400]="hoveredSeat.state === 'ReservedTemp'"
+                [class.text-red-400]="hoveredSeat.state === 'Paid'">
+            {{hoveredSeat.state === 'Free' ? 'Libre' : hoveredSeat.state === 'ReservedTemp' ? 'Réservé' : 'Vendu'}}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header bandeau -->
+  <div class="bg-[#0b0c0f] text-white">
+    <div class="max-w-7xl mx-auto px-6 py-5 flex gap-5 items-center">
+      <img [src]="event?.imageEvent || defaultImage" alt="" class="w-28 h-20 object-cover rounded-md" />
+      <div class="flex-1">
+        <h1 class="text-2xl font-bold leading-tight">{{ event?.name }}</h1>
+        <div class="text-sm opacity-80">
+          <span *ngIf="event?.date">{{ event?.date | date:'EEE, d MMM y • HH:mm' }}</span>
+          <span *ngIf="event?.venueName"> • {{ event?.venueName }} ({{ event?.venueCapacity }} places)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Description de l'événement -->
+  @if (event?.description) {
+    <div class="max-w-7xl mx-auto px-6 py-4">
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-bold mb-3">Description</h2>
+        <p class="text-gray-700">{{ event.description }}</p>
+      </div>
+    </div>
+  }
+
+  <!-- Corps en 2 colonnes -->
+  <div class="max-w-7xl mx-auto px-6 py-6 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
+    <!-- Colonne gauche : carte + outils -->
+    <div class="bg-white rounded-xl border overflow-hidden">
+      <div class="flex items-center gap-3 px-4 py-3 border-b">
+        <button class="px-3 py-1.5 border rounded-md" (click)="resetZoom()">⟲</button>
+        <button class="px-3 py-1.5 border rounded-md" (click)="zoomIn()">＋</button>
+        <button class="px-3 py-1.5 border rounded-md" (click)="zoomOut()">－</button>
+        <div class="ml-auto text-sm text-gray-500">Carte des sièges</div>
+      </div>
+
+      <!-- Canvas du stade (PROPRE: pan drag + zoom stable + pas de blink) -->
+      <div class="relative overflow-hidden bg-[#f7f8fa] map-viewport"
+           #viewport
+           (wheel)="onWheel($event)"
+           (pointerdown)="onPointerDown($event)"
+           (pointermove)="onPointerMove($event)"
+           (pointerup)="onPointerUp()"
+           (pointercancel)="onPointerUp()"
+           (pointerleave)="onPointerUp()">
+
+        <div class="origin-top-left"
+             [style.transform]="'translate('+panX+'px,'+panY+'px) scale('+zoom+')'">
+
+          <!-- viewBox agrandi pour permettre des cercles énormes -->
+          <svg viewBox="-100 -100 300 300" preserveAspectRatio="xMidYMid meet" class="w-full h-[620px]">
+            <!-- Fond du stade - CERCLE COMPLET (dynamique selon nombre de sièges) -->
+            <circle cx="50" cy="50" [attr.r]="backgroundCircleRadius + 1" fill="#f8f9fa"></circle>
+            <circle cx="50" cy="50" [attr.r]="backgroundCircleRadius" fill="#ffffff" stroke="#e5e7eb" stroke-width="0.2"></circle>
+
+            <!-- Cercle délimiteur des sièges (pour visualisation) -->
+            <circle cx="50" cy="50" [attr.r]="backgroundCircleRadius - 2" fill="none" stroke="#e0e0e0" stroke-width="0.1" stroke-dasharray="1,1"></circle>
+
+            <!-- Scène / Podium central circulaire -->
+            <circle cx="50" cy="50" r="9" fill="#f3f4f6" stroke="#d1d5db" stroke-width="0.4"></circle>
+            <text x="50" y="49.5" text-anchor="middle" font-size="2.8" fill="#111827" font-weight="bold">SCÈNE</text>
+            <text x="50" y="52.5" text-anchor="middle" font-size="2" fill="#6b7280">PODIUM</text>
+
+            <!-- Zones (optionnel : nom des sections) -->
+            <g *ngFor="let z of zones">
+              <text [attr.x]="z.labelX"
+                    [attr.y]="z.labelY"
+                    text-anchor="middle"
+                    font-size="2.8"
+                    fill="#374151"
+                    font-weight="600"
+                    opacity="0.85">
+                {{ z.name }}
+              </text>
+            </g>
+
+            <!-- Sièges CARRÉS (clic propre, pas de "départ") -->
+            <g *ngFor="let s of filteredSeats; trackBy: trackBySeatId"
+               (click)="onSeatClick($event, s)"
+               (mouseenter)="onSeatMouseEnter($event, s)"
+               (mouseleave)="onSeatMouseLeave()"
+               [attr.cursor]="canSelect(s) ? 'pointer' : 'not-allowed'"
+               class="seat-square">
+              <rect [attr.x]="s._x - s._size/2"
+                    [attr.y]="s._y - s._size/2"
+                    [attr.width]="s._size"
+                    [attr.height]="s._size"
+                    rx="0.2"
+                    [attr.fill]="seatFill(s)"
+                    stroke="#1f2937"
+                    stroke-width="0.1"
+                    [attr.opacity]="canSelect(s) ? '1' : '0.5'"/>
+            </g>
+
+          </svg>
+        </div>
+      </div>
+
+      <!-- Légende déplacée EN DEHORS du SVG -->
+      <div class="bg-white border-t px-4 py-3">
+        <div class="flex items-center justify-center gap-8">
+          <div class="flex items-center gap-2">
+            <div class="w-4 h-4 rounded-full bg-[#10b981]"></div>
+            <span class="text-sm text-gray-700">Libre</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="w-4 h-4 rounded-full bg-[#f59e0b]"></div>
+            <span class="text-sm text-gray-700">Réservé</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="w-4 h-4 rounded-full bg-[#ef4444]"></div>
+            <span class="text-sm text-gray-700">Vendu</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="w-4 h-4 rounded-full bg-[#3b82f6]"></div>
+            <span class="text-sm text-gray-700">Sélection</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Colonne droite : filtre + panier -->
+    <aside class="space-y-4">
+      <div class="bg-white rounded-xl border">
+        <div class="px-4 py-3 border-b font-semibold flex items-center gap-2">
+          <span>PLATEFORME PMR</span>
+        </div>
+        <div class="p-4">
+          <div class="text-sm text-gray-500 mb-2">Filtrer par</div>
+          <select class="w-full border rounded-md p-2"
+                  [(ngModel)]="filterZone"
+                  (ngModelChange)="applyFilter()">
+            <option value="">Tous les types de billets</option>
+            <option *ngFor="let z of zoneList" [value]="z">{{z}}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl border p-4">
+        <div class="font-semibold mb-2">Sélectionnez vos sièges sur la carte</div>
+        <div *ngIf="selected.length === 0" class="text-gray-500 text-sm">
+          Vos choix seront ajoutés ici
+        </div>
+
+        <div *ngFor="let s of selected" class="flex items-center justify-between py-2 border-b">
+          <div>
+            <div class="font-medium">{{ s.zone?.name || 'Zone' }}</div>
+            <div class="text-sm text-gray-500">Row {{ s.row }} • #{{ s.number }}</div>
+          </div>
+          <div class="text-right">
+            <div class="font-semibold">{{ s.price | currency:'EUR' }}</div>
+            <button class="text-xs underline" (click)="remove(s)">Retirer</button>
+          </div>
+        </div>
+
+        <div *ngIf="selected.length" class="flex items-center justify-between mt-3">
+          <span class="font-semibold">Total</span>
+          <span class="font-semibold">{{ total() | currency:'EUR' }}</span>
+        </div>
+
+        <button *ngIf="selected.length"
+                class="w-full mt-4 px-4 py-3 rounded-xl bg-[#001F3F] text-white"
+                [disabled]="loadingPay"
+                (click)="checkout()">
+          {{ loadingPay ? 'Traitement…' : 'Payer' }}
+        </button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Modal de paiement -->
+  <div *ngIf="showPaymentModal"
+       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+       (click)="showPaymentModal = false">
+    <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl"
+         (click)="$event.stopPropagation()">
+      <h2 class="text-2xl font-bold mb-6">Paiement</h2>
+
+      <!-- Résumé -->
+      <div class="bg-gray-50 rounded-lg p-4 mb-6">
+        <div class="flex justify-between mb-2">
+          <span class="text-gray-600">{{selected.length}} siège(s)</span>
+          <span class="font-semibold">{{ total() | currency:'EUR' }}</span>
+        </div>
+      </div>
+
+      <!-- Méthodes de paiement -->
+      <div class="mb-6">
+        <label class="block text-sm font-medium mb-3">Méthode de paiement</label>
+        <div class="grid grid-cols-3 gap-3">
+          <button (click)="paymentMethod = 'card'"
+                  [class.border-blue-500]="paymentMethod === 'card'"
+                  [class.bg-blue-50]="paymentMethod === 'card'"
+                  class="border-2 rounded-lg p-3 text-center hover:border-blue-300 transition">
+            💳 Carte
+          </button>
+          <button (click)="paymentMethod = 'paypal'"
+                  [class.border-blue-500]="paymentMethod === 'paypal'"
+                  [class.bg-blue-50]="paymentMethod === 'paypal'"
+                  class="border-2 rounded-lg p-3 text-center hover:border-blue-300 transition">
+            🅿️ PayPal
+          </button>
+          <button (click)="paymentMethod = 'bancontact'"
+                  [class.border-blue-500]="paymentMethod === 'bancontact'"
+                  [class.bg-blue-50]="paymentMethod === 'bancontact'"
+                  class="border-2 rounded-lg p-3 text-center hover:border-blue-300 transition">
+            🏦 Bancontact
+          </button>
+        </div>
+      </div>
+
+      <!-- Formulaire carte -->
+      <div *ngIf="paymentMethod === 'card'" class="space-y-4 mb-6">
+        <div>
+          <label class="block text-sm font-medium mb-1">Numéro de carte</label>
+          <input type="text"
+                 [(ngModel)]="cardNumber"
+                 placeholder="1234 5678 9012 3456"
+                 class="w-full border rounded-lg px-3 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Nom sur la carte</label>
+          <input type="text"
+                 [(ngModel)]="cardName"
+                 placeholder="Jean Dupont"
+                 class="w-full border rounded-lg px-3 py-2">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-medium mb-1">Expiration</label>
+            <input type="text"
+                   [(ngModel)]="cardExpiry"
+                   placeholder="MM/YY"
+                   class="w-full border rounded-lg px-3 py-2">
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">CVV</label>
+            <input type="text"
+                   [(ngModel)]="cardCVV"
+                   placeholder="123"
+                   maxlength="3"
+                   class="w-full border rounded-lg px-3 py-2">
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="paymentMethod === 'paypal'" class="mb-6 p-4 bg-blue-50 rounded-lg text-center">
+        <p class="text-sm text-gray-600">Vous serez redirigé vers PayPal</p>
+      </div>
+
+      <div *ngIf="paymentMethod === 'bancontact'" class="mb-6 p-4 bg-blue-50 rounded-lg text-center">
+        <p class="text-sm text-gray-600">Vous serez redirigé vers Bancontact</p>
+      </div>
+
+      <!-- Boutons -->
+      <div class="flex gap-3">
+        <button (click)="showPaymentModal = false"
+                class="flex-1 px-4 py-3 border-2 rounded-lg font-medium hover:bg-gray-50">
+          Annuler
+        </button>
+        <button (click)="processPayment()"
+                [disabled]="loadingPay"
+                class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50">
+          {{ loadingPay ? 'Traitement...' : 'Payer ' + (total() | currency:'EUR') }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal des Tickets avec QR Codes -->
+  <div *ngIf="showTicketsModal"
+       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+       (click)="showTicketsModal = false">
+    <div class="bg-white rounded-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+         (click)="$event.stopPropagation()">
+
+      <!-- Header -->
+      <div class="flex justify-between items-center mb-6 pb-4 border-b">
+        <h2 class="text-3xl font-bold">Vos Billets</h2>
+        <button (click)="showTicketsModal = false"
+                class="text-gray-500 hover:text-gray-700 text-2xl">
+          ×
+        </button>
+      </div>
+
+      <!-- Bouton télécharger tout -->
+      <div class="mb-6">
+        <button (click)="downloadAllTicketsPDF()"
+                class="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-4 rounded-xl font-bold text-lg hover:from-purple-700 hover:to-blue-700 shadow-lg flex items-center justify-center gap-2">
+          📄 Télécharger tous les billets (PDF)
+        </button>
+      </div>
+
+      <!-- Zone d'impression cachée -->
+      <div id="tickets-print-area" class="hidden">
+        <div *ngFor="let ticket of generatedTickets" class="ticket">
+          <div class="ticket-header">{{ticket.eventName}}</div>
+          <div class="ticket-info">
+            <div class="info-item">
+              <div class="info-label">Zone</div>
+              <div class="info-value">{{ticket.zoneName}}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Rangée</div>
+              <div class="info-value">{{ticket.row}}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Siège</div>
+              <div class="info-value">#{{ticket.number}}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Prix</div>
+              <div class="info-value">{{ticket.price}} €</div>
+            </div>
+          </div>
+          <div class="qr-section">
+            <img [src]="ticket.qrCodeUrl" alt="QR Code">
+            <div class="ticket-id">{{ticket.ticketNumber}}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Liste des tickets (affichage) -->
+      <div class="space-y-4">
+        <div *ngFor="let ticket of generatedTickets"
+             class="border-2 rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
+
+          <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-6">
+            <div class="flex justify-between items-start mb-4">
+              <div>
+                <h3 class="text-2xl font-bold">{{ticket.eventName}}</h3>
+                <p class="text-purple-100 text-sm mt-1">{{ticket.eventDate | date:'EEE, d MMM y • HH:mm'}}</p>
+              </div>
+              <button (click)="downloadSingleTicket(ticket)"
+                      class="bg-white text-purple-600 px-4 py-2 rounded-lg font-semibold hover:bg-purple-50 transition text-sm">
+                📥 PDF
+              </button>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div class="bg-white bg-opacity-10 rounded-lg p-3">
+                <div class="text-xs opacity-80 uppercase">Zone</div>
+                <div class="text-lg font-bold mt-1">{{ticket.zoneName}}</div>
+              </div>
+              <div class="bg-white bg-opacity-10 rounded-lg p-3">
+                <div class="text-xs opacity-80 uppercase">Rangée</div>
+                <div class="text-lg font-bold mt-1">{{ticket.row}}</div>
+              </div>
+              <div class="bg-white bg-opacity-10 rounded-lg p-3">
+                <div class="text-xs opacity-80 uppercase">Siège</div>
+                <div class="text-lg font-bold mt-1">#{{ticket.number}}</div>
+              </div>
+              <div class="bg-white bg-opacity-10 rounded-lg p-3">
+                <div class="text-xs opacity-80 uppercase">Prix</div>
+                <div class="text-lg font-bold mt-1">{{ticket.price | currency:'EUR'}}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white p-6 flex flex-col items-center">
+            <div class="text-sm text-gray-500 mb-3">Scannez ce QR code à l'entrée</div>
+            <img [src]="ticket.qrCodeUrl"
+                 alt="QR Code"
+                 class="w-48 h-48 border-4 border-purple-600 rounded-lg shadow-md">
+            <div class="mt-3 font-mono text-xs text-gray-500">{{ticket.ticketNumber}}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-6 text-center text-sm text-gray-500">
+        Présentez ces billets à l'entrée • Ne partagez pas vos QR codes
+      </div>
+    </div>
+  </div>
+</section>

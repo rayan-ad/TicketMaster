@@ -1,0 +1,55 @@
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-7xl mx-auto px-6 py-8">
+    <!-- Header -->
+    <div class="flex items-center gap-4 mb-8">
+      <a routerLink="/admin" class="text-purple-600 hover:text-purple-700 transition">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+      </a>
+      @if (venue) {
+        <div>
+          <h1 class="text-4xl font-bold text-[#001F3F]">{{ venue.name }}</h1>
+          <p class="text-gray-600 mt-1">Capacité: {{ venue.capacity }} places</p>
+        </div>
+      }
+    </div>
+
+    <!-- Events -->
+    <div class="bg-white rounded-xl shadow border p-6">
+      <h2 class="text-2xl font-bold mb-6">Événements</h2>
+
+      @if (loading) {
+        <p class="text-center py-8 text-gray-500">Chargement...</p>
+      } @else if (events.length === 0) {
+        <div class="text-center py-12">
+          <p class="text-gray-500 text-lg">Aucun événement programmé dans cette salle</p>
+          <a routerLink="/admin" class="inline-block mt-4 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+            Retour au dashboard
+          </a>
+        </div>
+      } @else {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          @for (event of events; track event.id) {
+            <a [routerLink]="['/event', event.id]" class="block border rounded-lg overflow-hidden hover:shadow-lg transition">
+              <img [src]="event.imageEvent || 'default-event.jpeg'" alt="" class="w-full h-48 object-cover">
+              <div class="p-4">
+                <h3 class="font-bold text-lg mb-2 hover:text-purple-600">{{ event.name }}</h3>
+                <p class="text-sm text-gray-600 mb-2">
+                  <span class="font-semibold">📅</span> {{ event.date | date:'EEE, d MMM y • HH:mm' }}
+                </p>
+                <p class="text-sm text-gray-500">
+                  <span class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs">{{ event.type }}</span>
+                </p>
+              </div>
+            </a>
+          }
+        </div>
+
+        <div class="mt-8 text-center">
+          <p class="text-gray-600">{{ events.length }} événement(s) trouvé(s)</p>
+        </div>
+      }
+    </div>
+  </div>
+</div>

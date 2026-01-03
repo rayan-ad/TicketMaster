@@ -1,0 +1,71 @@
+# =====================
+# .NET / Visual Studio
+# =====================
+bin/
+obj/
+.vs/
+.vscode/
+.idea/
+
+*.user
+*.suo
+*.cache
+*.log
+*.tlog
+*.lastbuildstate
+*.idb
+*.ipch
+*.sln.docstates
+
+appsettings.Development.json
+
+# =====================
+# Entity Framework
+# =====================
+*.db
+*.db-shm
+*.db-wal
+
+# =====================
+# NuGet
+# =====================
+*.nupkg
+*.snupkg
+packages/
+.nuget/
+
+# =====================
+# Angular / Node
+# =====================
+node_modules/
+dist/
+.angular/
+out-tsc/
+tmp/
+
+npm-debug.log
+yarn-error.log
+
+.env
+.env.local
+.env.*.local
+
+# Angular specific paths
+ticketmaster-web/node_modules/
+ticketmaster-web/dist/
+ticketmaster-web/.angular/
+
+# =====================
+# OS / Editor
+# =====================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# =====================
+# Temp
+# =====================
+*.tmp
+*.temp

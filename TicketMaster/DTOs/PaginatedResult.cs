@@ -1,0 +1,15 @@
+namespace TicketMaster.DTOs
+{
+    /// <summary>
+    /// DTO générique pour les résultats paginés
+    /// </summary>
+    /// <typeparam name="T">Type des items de la liste</typeparam>
+    public class PaginatedResult<T>
+    {
+        public List<T> Items { get; set; } = new();
+        public int TotalCount { get; set; }
+        public int PageNumber { get; set; }
+        public int PageSize { get; set; }
+        public int TotalPages => (int)Math.Ceiling(TotalCount / (double)PageSize);
+    }
+}
